@@ -1,6 +1,7 @@
+import errno
 import os
-import uuid
 import subprocess
+import uuid
 from flask import Flask, render_template, request, send_file, abort, jsonify
 
 UPLOAD_DIR = "uploads"
@@ -50,7 +51,14 @@ def upload():
     vid_id = str(uuid.uuid4())
     ext = os.path.splitext(file.filename)[1] or ".mp4"
     in_path = os.path.join(UPLOAD_DIR, vid_id + ext)
-    file.save(in_path)
+    try:
+        file.save(in_path)
+    except OSError as exc:
+        if os.path.exists(in_path):
+            os.remove(in_path)
+        if exc.errno == errno.ENOSPC:
+            abort(507, "disk is full; expand or remap uploads/outputs volume")
+        raise
 
     try:
         duration = ffprobe_duration(in_path)
