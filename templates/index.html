@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Quick Snip</title>
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            margin: 0;
+            padding: 1rem;
+            background: #111827;
+            color: #e5e7eb;
+        }
+        #dropzone {
+            border: 2px dashed #6b7280;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            margin-bottom: 1rem;
+            cursor: pointer;
+        }
+        #dropzone.dragover {
+            border-color: #10b981;
+            background: #020617;
+        }
+        video {
+            width: 100%;
+            max-height: 480px;
+            background: black;
+            margin-bottom: 0.75rem;
+        }
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        .row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        input[type="range"] {
+            flex: 1;
+        }
+        button {
+            background: #1f2937;
+            color: #e5e7eb;
+            border: 1px solid #4b5563;
+            border-radius: 4px;
+            padding: 0.35rem 0.75rem;
+            cursor: pointer;
+        }
+        button.primary {
+            background: #10b981;
+            border-color: #059669;
+            color: #022c22;
+            font-weight: 600;
+        }
+        button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        small {
+            color: #9ca3af;
+        }
+    </style>
+</head>
+<body>
+<h2>Quick Video Snip</h2>
+<div id="dropzone">
+    <p>Drop a video here or click to choose.</p>
+    <input id="file-input" type="file" accept="video/*" style="display:none;">
+</div>
+
+<video id="video" controls hidden></video>
+
+<div id="ui" class="controls" hidden>
+    <div class="row">
+        <label style="width:80px;">Start</label>
+        <input id="start-range" type="range" min="0" max="0" step="0.05">
+        <span id="start-label">0.0s</span>
+        <button id="set-start">From playhead</button>
+    </div>
+    <div class="row">
+        <label style="width:80px;">End</label>
+        <input id="end-range" type="range" min="0" max="0" step="0.05">
+        <span id="end-label">0.0s</span>
+        <button id="set-end">From playhead</button>
+    </div>
+    <div class="row">
+        <small>Video duration: <span id="duration-label">0.0</span>s</small>
+    </div>
+    <div class="row">
+        <button id="preview">Preview segment</button>
+        <button id="cut" class="primary">Cut &amp; Download</button>
+    </div>
+</div>
+
+<script>
+(() => {
+    const dropzone = document.getElementById("dropzone");
+    const fileInput = document.getElementById("file-input");
+    const video = document.getElementById("video");
+    const ui = document.getElementById("ui");
+
+    const startRange = document.getElementById("start-range");
+    const endRange = document.getElementById("end-range");
+    const startLabel = document.getElementById("start-label");
+    const endLabel = document.getElementById("end-label");
+    const durationLabel = document.getElementById("duration-label");
+
+    const btnSetStart = document.getElementById("set-start");
+    const btnSetEnd = document.getElementById("set-end");
+    const btnPreview = document.getElementById("preview");
+    const btnCut = document.getElementById("cut");
+
+    let videoMeta = null; // { id, ext, duration, url }
+    let previewing = false;
+
+    function fmt(t) {
+        return t.toFixed(2);
+    }
+
+    function wireDropzone() {
+        dropzone.addEventListener("click", () => fileInput.click());
+        fileInput.addEventListener("change", e => {
+            if (e.target.files && e.target.files[0]) {
+                uploadFile(e.target.files[0]);
+            }
+        });
+
+        ["dragenter", "dragover"].forEach(ev => {
+            dropzone.addEventListener(ev, e => {
+                e.preventDefault();
+                e.stopPropagation();
+                dropzone.classList.add("dragover");
+            });
+        });
+        ["dragleave", "drop"].forEach(ev => {
+            dropzone.addEventListener(ev, e => {
+                e.preventDefault();
+                e.stopPropagation();
+                dropzone.classList.remove("dragover");
+            });
+        });
+        dropzone.addEventListener("drop", e => {
+            const file = e.dataTransfer.files[0];
+            if (file) uploadFile(file);
+        });
+    }
+
+    async function uploadFile(file) {
+        btnCut.disabled = true;
+        btnPreview.disabled = true;
+        dropzone.innerHTML = "<p>Uploading…</p>";
+
+        const form = new FormData();
+        form.append("file", file);
+        const resp = await fetch("/upload", {
+            method: "POST",
+            body: form
+        });
+        if (!resp.ok) {
+            dropzone.innerHTML = "<p>Upload failed.</p>";
+            return;
+        }
+        videoMeta = await resp.json();
+
+        // Load video
+        video.src = videoMeta.url;
+        video.hidden = false;
+        ui.hidden = false;
+
+        const duration = videoMeta.duration;
+        startRange.min = 0;
+        startRange.max = duration;
+        endRange.min = 0;
+        endRange.max = duration;
+        startRange.value = 0;
+        endRange.value = duration;
+        startLabel.textContent = "0.00s";
+        endLabel.textContent = fmt(duration) + "s";
+        durationLabel.textContent = fmt(duration);
+
+        dropzone.innerHTML = "<p>Drop another video to replace.</p>";
+        btnCut.disabled = false;
+        btnPreview.disabled = false;
+    }
+
+    function syncLabels() {
+        const start = parseFloat(startRange.value);
+        const end = parseFloat(endRange.value);
+        if (end < start) {
+            endRange.value = start;
+        }
+        startLabel.textContent = fmt(parseFloat(startRange.value)) + "s";
+        endLabel.textContent = fmt(parseFloat(endRange.value)) + "s";
+    }
+
+    startRange.addEventListener("input", syncLabels);
+    endRange.addEventListener("input", syncLabels);
+
+    btnSetStart.addEventListener("click", () => {
+        if (videoMeta) {
+            startRange.value = Math.min(video.currentTime, parseFloat(endRange.value));
+            syncLabels();
+        }
+    });
+
+    btnSetEnd.addEventListener("click", () => {
+        if (videoMeta) {
+            endRange.value = Math.max(video.currentTime, parseFloat(startRange.value));
+            syncLabels();
+        }
+    });
+
+    btnPreview.addEventListener("click", () => {
+        if (!videoMeta) return;
+        const start = parseFloat(startRange.value);
+        const end = parseFloat(endRange.value);
+        if (end <= start) return;
+
+        previewing = true;
+        video.currentTime = start;
+        video.play();
+    });
+
+    video.addEventListener("timeupdate", () => {
+        if (!previewing) return;
+        const end = parseFloat(endRange.value);
+        if (video.currentTime >= end) {
+            video.pause();
+            previewing = false;
+        }
+    });
+
+    btnCut.addEventListener("click", async () => {
+        if (!videoMeta) return;
+        btnCut.disabled = true;
+        btnCut.textContent = "Cutting…";
+
+        const start = parseFloat(startRange.value);
+        const end = parseFloat(endRange.value);
+
+        const resp = await fetch("/cut", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                id: videoMeta.id,
+                ext: videoMeta.ext,
+                start: start,
+                end: end
+            })
+        });
+
+        if (!resp.ok) {
+            alert("Cut failed.");
+            btnCut.disabled = false;
+            btnCut.textContent = "Cut & Download";
+            return;
+        }
+
+        const blob = await resp.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "clip.mp4";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+
+        btnCut.disabled = false;
+        btnCut.textContent = "Cut & Download";
+    });
+
+    wireDropzone();
+})();
+</script>
+</body>
+</html>
