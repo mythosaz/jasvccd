@@ -6,6 +6,10 @@ services:
     ports:
       - "8207:8000"
     volumes:
-      - ./data:/app/uploads
-      - ./data_out:/app/outputs
+      - jas_data:/app/uploads
+      - jas_out:/app/outputs
     restart: unless-stopped
+
+volumes:
+  jas_data:
+  jas_out:
