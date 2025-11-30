@@ -1,0 +1,10 @@
+services:
+  quick-snip:
+    build: .
+    image: quick-snip:latest
+    ports:
+      - "8080:8000"
+    volumes:
+      - ./data:/app/uploads
+      - ./data_out:/app/outputs
+    restart: unless-stopped
