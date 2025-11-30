@@ -37,7 +37,7 @@ That builds the image, binds the app on `http://localhost:8080`, and mounts `./d
 Once this repo is on GitHub you can also run it directly from the raw compose file (no clone) if you trust the source:
 
 ```bash
-docker compose -f https://raw.githubusercontent.com/mythosaz/jasvccd/main/docker-compose.yml up -d
+docker compose -f https://raw.githubusercontent.com/mythosaz/jasvccd/refs/heads/main/docker-compose.yml up -d
 ```
 
 Replace the `networks:` block or port mappings as needed for your environment. If you publish a prebuilt image to GHCR or Docker Hub, update `image:` in `docker-compose.yml` to point to it and drop the `build:` line for faster startups.
