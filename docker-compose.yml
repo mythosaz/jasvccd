@@ -8,3 +8,9 @@ services:
       - ./data:/app/uploads
       - ./data_out:/app/outputs
     restart: unless-stopped
+    networks:
+      - quick-snip-net
+
+networks:
+  quick-snip-net:
+    driver: bridge
