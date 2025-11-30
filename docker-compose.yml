@@ -2,15 +2,10 @@ services:
   quick-snip:
     build: .
     image: quick-snip:latest
+    network_mode: bridge
     ports:
-      - "8080:8000"
+      - "8207:8000"
     volumes:
       - ./data:/app/uploads
       - ./data_out:/app/outputs
     restart: unless-stopped
-    networks:
-      - quick-snip-net
-
-networks:
-  quick-snip-net:
-    driver: bridge
