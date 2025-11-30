@@ -1,7 +1,7 @@
 services:
-  quick-snip:
+  jasvccd:
     build: .
-    image: quick-snip:latest
+    image: jasvccd:latest
     network_mode: bridge
     ports:
       - "8207:8000"

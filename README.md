@@ -15,11 +15,11 @@ Repository: https://github.com/mythosaz/jasvccd
 Build and run with Docker:
 
 ```bash
-docker build -t quick-snip .
+docker build -t jasvccd .
 docker run --rm -p 8080:8000 \
   -v "$(pwd)/data:/app/uploads" \
   -v "$(pwd)/data_out:/app/outputs" \
-  quick-snip
+  jasvccd
 ```
 
 Open http://localhost:8080 and drop a video. The original file stays in `data/`; trimmed clips are written to `data_out/` and also downloaded to your browser.
