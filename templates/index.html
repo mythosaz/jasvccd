@@ -11,6 +11,15 @@
             background: #111827;
             color: #e5e7eb;
         }
+        header {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+        header img {
+            max-width: 260px;
+            width: 100%;
+        }
         #dropzone {
             border: 2px dashed #6b7280;
             border-radius: 8px;
@@ -64,10 +73,21 @@
         small {
             color: #9ca3af;
         }
+        footer {
+            margin-top: 1.5rem;
+            text-align: center;
+            color: #9ca3af;
+            font-size: 0.85rem;
+        }
+        footer a {
+            color: #9ca3af;
+        }
     </style>
 </head>
 <body>
-<h2>Quick Video Snip</h2>
+<header>
+    <img src="/static/jasvccd-logo.svg" alt="JASVCCD">
+</header>
 <div id="dropzone">
     <p>Drop a video here or click to choose.</p>
     <input id="file-input" type="file" accept="video/*" style="display:none;">
@@ -96,6 +116,11 @@
         <button id="cut" class="primary">Cut &amp; Download</button>
     </div>
 </div>
+
+<footer>
+    Credits & source on <a href="https://github.com/mythosaz/jasvccd/" target="_blank" rel="noopener">GitHub</a>
+    (ffmpeg and other dependencies acknowledged there).
+</footer>
 
 <script>
 (() => {

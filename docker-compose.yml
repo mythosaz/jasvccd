@@ -1,10 +1,8 @@
 services:
   jasvccd:
-    build: .
-    image: jasvccd:latest
-    network_mode: bridge
+    image: mythosaz/jasvccd:latest
     ports:
-      - "8207:8000"
+      - "8080:8000"
     volumes:
       - jas_data:/app/uploads
       - jas_out:/app/outputs

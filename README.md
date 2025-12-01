@@ -1,6 +1,7 @@
 # Just a Simple Video Cropper Cutter Docker
 
-Minimal Flask + ffmpeg web app for trimming video clips in the browser. Upload or drag a video, set start/end markers, preview, then download the cropped segment.
+Minimal Flask + ffmpeg web app for trimming video clips in the browser. Upload or drag a video, set start/end markers, preview,
+then download the cropped segment.
 
 Repository: https://github.com/mythosaz/jasvccd
 
@@ -12,41 +13,34 @@ Repository: https://github.com/mythosaz/jasvccd
 - Containerized for easy run anywhere
 
 ## Quick start
-Build and run with Docker:
+Run the published container image (replace the bind mounts with your own paths if needed):
 
 ```bash
-docker build -t jasvccd .
 docker run --rm -p 8080:8000 \
   -v "$(pwd)/data:/app/uploads" \
   -v "$(pwd)/data_out:/app/outputs" \
-  jasvccd
+  mythosaz/jasvccd:latest
 ```
 
 Open http://localhost:8080 and drop a video. The original file stays in `data/`; trimmed clips are written to `data_out/` and also downloaded to your browser.
 
-### Docker Compose (one command)
+### Docker Compose
 
-With Docker Compose v2 installed you can spin it up with a single command (replace the network stanza if you want to attach to an existing Docker network):
+With Docker Compose v2 installed you can spin it up with a single command:
 
 ```bash
 docker compose up -d
 ```
 
-That builds the image, binds the app on `http://localhost:8080`, and mounts `./data` → `/app/uploads` and `./data_out` → `/app/outputs`.
+This pulls `mythosaz/jasvccd:latest`, binds the app on `http://localhost:8080`, and mounts `./data` → `/app/uploads` and `./data_out` → `/app/outputs`.
 
-Once this repo is on GitHub you can also run it directly from the raw compose file (no clone) if you trust the source:
-
-```bash
-docker compose -f https://raw.githubusercontent.com/mythosaz/jasvccd/refs/heads/main/docker-compose.yml up -d
-```
-
-Replace the `networks:` block or port mappings as needed for your environment. If you publish a prebuilt image to GHCR or Docker Hub, update `image:` in `docker-compose.yml` to point to it and drop the `build:` line for faster startups.
+If you need a specific network mode (for example on some NAS environments), add the relevant stanza under `services.jasvccd` in `docker-compose.yml`.
 
 ## Repository layout
 
 - `app.py` – Flask app that handles uploads, validation, ffprobe duration lookup, and ffmpeg-based cuts.
 - `templates/index.html` – Single-page UI with drag-and-drop upload, preview player, and range sliders for start/end markers.
-- `docker-compose.yml` – Compose definition that builds the local image, exposes port 8080→8000, mounts `./data` to `/app/uploads`, and `./data_out` to `/app/outputs`.
+- `docker-compose.yml` – Compose definition that pulls the published image, exposes port 8080→8000, and mounts `./data` to `/app/uploads` and `./data_out` to `/app/outputs`.
 - `Dockerfile` / `requirements.txt` – Runtime environment (Python + ffmpeg) and Python dependencies.
 - `uploads/` and `outputs/` – Created at runtime; the compose file maps them to `./data` and `./data_out` for persistence.
 
