@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 1200 200"
+  role="img"
+  aria-labelledby="title desc">
+  <title id="title">jasvccd – Just a Simple Video Cropper Cutter Docker</title>
+  <desc id="desc">
+    Horizontal banner logo for jasvccd, styled to match typeDragon tools.
+  </desc>
+
+  <!-- Gradient for main title (acc1 → good) -->
+  <defs>
+    <linearGradient id="jasvccd-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#7aa2f7"/>
+      <stop offset="100%" stop-color="#9ece6a"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Main title -->
+  <text
+    x="50%"
+    y="90"
+    text-anchor="middle"
+    font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+    font-size="52"
+    font-weight="700"
+    fill="url(#jasvccd-gradient)">
+    jasvccd
+  </text>
+
+  <!-- Subtitle -->
+  <text
+    x="50%"
+    y="130"
+    text-anchor="middle"
+    font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+    font-size="18"
+    fill="#a0a3ab">
+    Just a Simple Video Cropper Cutter Docker
+  </text>
+
+  <!-- Minimal underline / timeline hint -->
+  <line
+    x1="260"
+    y1="150"
+    x2="940"
+    y2="150"
+    stroke="#2a2d3a"
+    stroke-width="2"
+    stroke-linecap="round" />
+</svg>
