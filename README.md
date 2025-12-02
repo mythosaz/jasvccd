@@ -1,56 +1,46 @@
-# Just a Simple Video Cropper Cutter Docker
+# JASVCCD – Just a Simple Video Cropper Cutter Docker
 
-Minimal Flask + ffmpeg web app for trimming video clips in the browser. Upload or drag a video, set start/end markers, preview,
-then download the cropped segment.
+Minimal Flask + FFmpeg web UI for trimming video clips in the browser. Upload a file, set start/end markers, preview, then download the cropped segment. An official Docker Hub image is auto-built by GitHub Actions and ready to run.
 
-Repository: https://github.com/mythosaz/jasvccd
+- Source: https://github.com/mythosaz/jasvccd
+- Image: https://hub.docker.com/r/mythosaz/jasvccd
 
-## Features (Phase 1)
+## Quick Start (Docker Compose)
+Spin it up with persistent upload/output volumes:
+
+```yaml
+version: "3.8"
+services:
+  jasvccd:
+    image: mythosaz/jasvccd:latest
+    container_name: jasvccd
+    ports:
+      - "8302:8000"
+    volumes:
+      - jas_data:/app/uploads
+      - jas_out:/app/outputs
+    restart: unless-stopped
+
+volumes:
+  jas_data:
+  jas_out:
+```
+
+Open http://localhost:8302 and drop a video. The original file stays under `jas_data`; trimmed clips are written to `jas_out` and downloaded to your browser.
+
+## Image & CI
+- The official image `mythosaz/jasvccd:latest` is built automatically via GitHub Actions (see `.github/workflows/docker-publish.yml`).
+- Publishes to Docker Hub on pushes to the default branch.
+- Works anywhere Docker runs—home labs, NAS boxes, or cloud runners.
+
+## Features
 - Drag-and-drop or file-picker video upload
 - Inline playback with adjustable start/end sliders
-- Preview the selected segment
-- Server-side trimming via ffmpeg with download link
+- Preview the selected segment before exporting
+- Server-side trimming via FFmpeg with download link
 - Containerized for easy run anywhere
 
-## Quick start
-Run the published container image (replace the bind mounts with your own paths if needed):
-
-```bash
-docker run --rm -p 8080:8000 \
-  -v "$(pwd)/data:/app/uploads" \
-  -v "$(pwd)/data_out:/app/outputs" \
-  mythosaz/jasvccd:latest
-```
-
-Open http://localhost:8080 and drop a video. The original file stays in `data/`; trimmed clips are written to `data_out/` and also downloaded to your browser.
-
-### Docker Compose
-
-With Docker Compose v2 installed you can spin it up with a single command:
-
-```bash
-docker compose up -d
-```
-
-This pulls `mythosaz/jasvccd:latest`, binds the app on `http://localhost:8080`, and mounts `./data` → `/app/uploads` and `./data_out` → `/app/outputs`.
-
-If you need a specific network mode (for example on some NAS environments), add the relevant stanza under `services.jasvccd` in `docker-compose.yml`.
-
-## Repository layout
-
-- `app.py` – Flask app that handles uploads, validation, ffprobe duration lookup, and ffmpeg-based cuts.
-- `templates/index.html` – Single-page UI with drag-and-drop upload, preview player, and range sliders for start/end markers.
-- `docker-compose.yml` – Compose definition that pulls the published image, exposes port 8080→8000, and mounts `./data` to `/app/uploads` and `./data_out` to `/app/outputs`.
-- `Dockerfile` / `requirements.txt` – Runtime environment (Python + ffmpeg) and Python dependencies.
-- `uploads/` and `outputs/` – Created at runtime; the compose file maps them to `./data` and `./data_out` for persistence.
-
-## Attribution
-
-- Flask (BSD-3-Clause) powers the web app backend.
-- ffmpeg (LGPL/GPL, depends on build) performs video inspection (`ffprobe`) and trimming (`ffmpeg`).
-- Frontend is plain HTML5/JavaScript/CSS served via Flask's template engine—no third-party UI libraries required.
-
-## Local dev
+## Local development
 ```bash
 python -m venv .venv
 source .venv/bin/activate
@@ -59,3 +49,9 @@ python app.py  # http://localhost:8000
 ```
 
 Uploads save to `uploads/`, outputs to `outputs/`.
+
+## Attributions
+- FFmpeg (LGPL) for probing and cutting media.
+- Flask (BSD-3-Clause) powering the web server.
+- GitHub Octicons (MIT) for the GitHub mark.
+- Project logo and UI styling under the repository license.

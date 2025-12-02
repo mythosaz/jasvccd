@@ -16,9 +16,11 @@
             justify-content: center;
             margin-bottom: 1rem;
         }
-        header img {
-            max-width: 260px;
-            width: 100%;
+        .logo {
+            width: 60%;
+            max-width: 480px;
+            min-width: 280px;
+            height: auto;
         }
         #dropzone {
             border: 2px dashed #6b7280;
@@ -75,18 +77,29 @@
         }
         footer {
             margin-top: 1.5rem;
-            text-align: center;
             color: #9ca3af;
             font-size: 0.85rem;
         }
         footer a {
             color: #9ca3af;
         }
+        .attrib {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            align-items: center;
+            text-align: center;
+        }
+        .attrib-icon {
+            width: 18px;
+            height: 18px;
+            vertical-align: middle;
+        }
     </style>
 </head>
 <body>
 <header>
-    <img src="/static/jasvccd-logo.svg" alt="JASVCCD">
+    <img class="logo" src="/static/jasvccd.svg" alt="JASVCCD">
 </header>
 <div id="dropzone">
     <p>Drop a video here or click to choose.</p>
@@ -118,8 +131,16 @@
 </div>
 
 <footer>
-    Credits & source on <a href="https://github.com/mythosaz/jasvccd/" target="_blank" rel="noopener">GitHub</a>
-    (ffmpeg and other dependencies acknowledged there).
+    <div class="attrib">
+        <div>
+            Credits & source on <a href="https://github.com/mythosaz/jasvccd/" target="_blank" rel="noopener">GitHub</a>
+        </div>
+        <div>
+            <img class="attrib-icon" src="/static/Octicons-mark-github.svg" alt="GitHub icon"> Open source •
+            <img class="attrib-icon" src="/static/FFmpeg_Logo_new.svg" alt="FFmpeg logo"> Powered by FFmpeg •
+            <img class="attrib-icon" src="/static/Flask_logo.svg" alt="Flask logo"> Served with Flask
+        </div>
+    </div>
 </footer>
 
 <script>
