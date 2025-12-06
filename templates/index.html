@@ -6,47 +6,86 @@
     <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
     <link rel="alternate icon" type="image/x-icon" href="/static/favicon.ico">
     <style>
+        :root {
+            --bg: #0f172a;
+            --fg: #e5e7eb;
+            --muted: #a5b4fc;
+            --card: #0b162f;
+            --card-border: #1f2937;
+            --accent: #10b981;
+            --subtle: #9ca3af;
+            --input: #1f2937;
+        }
+        body.light {
+            --bg: #f8fafc;
+            --fg: #0f172a;
+            --muted: #4338ca;
+            --card: #ffffff;
+            --card-border: #e2e8f0;
+            --accent: #059669;
+            --subtle: #475569;
+            --input: #e2e8f0;
+        }
         body {
             font-family: system-ui, sans-serif;
             margin: 0;
             padding: 1rem;
-            background: #111827;
-            color: #e5e7eb;
+            background: var(--bg);
+            color: var(--fg);
+            transition: background 0.25s ease, color 0.25s ease;
+        }
+        .page {
+            max-width: 960px;
+            margin: 0 auto;
         }
         header {
             display: flex;
-            justify-content: center;
+            align-items: center;
+            justify-content: space-between;
             margin-bottom: 1rem;
+            gap: 1rem;
         }
         .logo {
             width: 80%;
             max-width: 720px;
-            min-width: 340px;
+            min-width: 240px;
             height: auto;
+        }
+        #theme-toggle {
+            background: var(--input);
+            color: var(--fg);
+            border: 1px solid var(--card-border);
+        }
+        main {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
         }
         #dropzone {
             border: 2px dashed #6b7280;
             border-radius: 8px;
-            padding: 2rem;
+            padding: 1.5rem;
             text-align: center;
-            margin-bottom: 1rem;
             cursor: pointer;
+            background: rgba(255, 255, 255, 0.02);
         }
         #dropzone.dragover {
-            border-color: #10b981;
-            background: #020617;
+            border-color: var(--accent);
+            background: rgba(16, 185, 129, 0.06);
         }
         video {
             width: 100%;
-            max-height: 480px;
+            aspect-ratio: 16 / 9;
             background: black;
-            margin-bottom: 0.75rem;
+            margin-bottom: 0.5rem;
+            border-radius: 8px;
+            border: 1px solid var(--card-border);
         }
         .controls {
             display: flex;
             flex-direction: column;
             gap: 0.5rem;
-            margin-top: 0.5rem;
+            margin-top: 0.25rem;
         }
         .row {
             display: flex;
@@ -57,16 +96,16 @@
             flex: 1;
         }
         button {
-            background: #1f2937;
-            color: #e5e7eb;
-            border: 1px solid #4b5563;
+            background: var(--input);
+            color: var(--fg);
+            border: 1px solid var(--card-border);
             border-radius: 4px;
             padding: 0.35rem 0.75rem;
             cursor: pointer;
         }
         button.primary {
-            background: #10b981;
-            border-color: #059669;
+            background: var(--accent);
+            border-color: var(--accent);
             color: #022c22;
             font-weight: 600;
         }
@@ -75,15 +114,15 @@
             cursor: not-allowed;
         }
         small {
-            color: #9ca3af;
+            color: var(--subtle);
         }
         footer {
             margin-top: 1.5rem;
-            color: #9ca3af;
-            font-size: 0.85rem;
+            color: var(--subtle);
+            font-size: 0.9rem;
         }
         footer a {
-            color: #9ca3af;
+            color: var(--muted);
         }
         .attrib {
             display: flex;
@@ -91,73 +130,86 @@
             gap: 0.4rem;
             align-items: center;
             text-align: center;
-            background: linear-gradient(135deg, #0b1326, #0b162f);
-            border: 1px solid #1f2937;
-            padding: 0.9rem 1.2rem;
-            border-radius: 10px;
+            background: linear-gradient(135deg, rgba(12, 19, 42, 0.92), rgba(9, 13, 30, 0.94));
+            border: 1px solid var(--card-border);
+            padding: 0.85rem 1rem;
+            border-radius: 12px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
-            width: min(960px, 96%);
+            width: min(780px, 95%);
             margin: 0 auto;
-            color: #e5e7eb;
+            color: var(--fg);
+        }
+        body.light .attrib {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.95));
+            box-shadow: 0 8px 22px rgba(15, 23, 42, 0.12);
         }
         .attrib a {
-            color: #c7d2fe;
+            color: var(--muted);
+            font-weight: 600;
         }
         .attrib-icon {
             width: 18px;
             height: 18px;
             vertical-align: middle;
+            filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.25));
         }
     </style>
 </head>
 <body>
-<header>
-    <img class="logo" src="/static/jasvccd.svg" alt="JASVCCD">
-</header>
-<div id="dropzone">
-    <p>Drop a video here or click to choose.</p>
-    <input id="file-input" type="file" accept="video/*" style="display:none;">
-</div>
+<div class="page">
+    <header>
+        <img class="logo" src="/static/jasvccd.svg" alt="JASVCCD">
+        <button id="theme-toggle" aria-label="Toggle theme">🌗</button>
+    </header>
 
-<video id="video" controls hidden></video>
-
-<div id="ui" class="controls" hidden>
-    <div class="row">
-        <label style="width:80px;">Start</label>
-        <input id="start-range" type="range" min="0" max="0" step="0.05">
-        <span id="start-label">0.0s</span>
-        <button id="set-start">From playhead</button>
-    </div>
-    <div class="row">
-        <label style="width:80px;">End</label>
-        <input id="end-range" type="range" min="0" max="0" step="0.05">
-        <span id="end-label">0.0s</span>
-        <button id="set-end">From playhead</button>
-    </div>
-    <div class="row">
-        <small>Video duration: <span id="duration-label">0.0</span>s</small>
-    </div>
-    <div class="row">
-        <button id="preview">Preview segment</button>
-        <button id="cut" class="primary">Cut &amp; Download</button>
-    </div>
-</div>
-
-<footer>
-    <div class="attrib">
-        <div>
-            Credits & source on <a href="https://github.com/mythosaz/jasvccd/" target="_blank" rel="noopener">GitHub</a>
+    <main>
+        <div id="dropzone">
+            <p>Drop a video here or click to choose.</p>
+            <input id="file-input" type="file" accept="video/*" style="display:none;">
         </div>
-        <div>
-            <img class="attrib-icon" src="/static/Octicons-mark-github.svg" alt="GitHub icon"> Open source •
-            <img class="attrib-icon" src="/static/FFmpeg_Logo_new.svg" alt="FFmpeg logo"> Powered by FFmpeg •
-            <img class="attrib-icon" src="/static/Flask_logo.svg" alt="Flask logo"> Served with Flask
+
+        <video id="video" controls hidden></video>
+
+        <div id="ui" class="controls" hidden>
+            <div class="row">
+                <label style="width:80px;">Start</label>
+                <input id="start-range" type="range" min="0" max="0" step="0.05">
+                <span id="start-label">0.0s</span>
+                <button id="set-start">From playhead</button>
+            </div>
+            <div class="row">
+                <label style="width:80px;">End</label>
+                <input id="end-range" type="range" min="0" max="0" step="0.05">
+                <span id="end-label">0.0s</span>
+                <button id="set-end">From playhead</button>
+            </div>
+            <div class="row">
+                <small>Video duration: <span id="duration-label">0.0</span>s</small>
+            </div>
+            <div class="row">
+                <button id="preview">Preview segment</button>
+                <button id="cut" class="primary">Cut &amp; Download</button>
+            </div>
         </div>
-    </div>
-</footer>
+    </main>
+
+    <footer>
+        <div class="attrib">
+            <div>
+                Credits & source on <a href="https://github.com/mythosaz/jasvccd/" target="_blank" rel="noopener">GitHub</a>
+            </div>
+            <div>
+                <img class="attrib-icon" src="/static/Octicons-mark-github.svg" alt="GitHub icon"> Open source •
+                <img class="attrib-icon" src="/static/FFmpeg_Logo_new.svg" alt="FFmpeg logo"> Powered by FFmpeg •
+                <img class="attrib-icon" src="/static/Flask_logo.svg" alt="Flask logo"> Served with Flask
+            </div>
+        </div>
+    </footer>
+</div>
 
 <script>
 (() => {
+    const themeToggle = document.getElementById("theme-toggle");
     const dropzone = document.getElementById("dropzone");
     const fileInput = document.getElementById("file-input");
     const video = document.getElementById("video");
@@ -176,6 +228,28 @@
 
     let videoMeta = null; // { id, ext, duration, url }
     let previewing = false;
+
+    function setTheme(mode) {
+        const isLight = mode === "light";
+        document.body.classList.toggle("light", isLight);
+        localStorage.setItem("theme", isLight ? "light" : "dark");
+        themeToggle.textContent = isLight ? "🌞" : "🌙";
+    }
+
+    function initTheme() {
+        const stored = localStorage.getItem("theme");
+        if (stored === "light" || stored === "dark") {
+            setTheme(stored);
+            return;
+        }
+        const prefersLight = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches;
+        setTheme(prefersLight ? "light" : "dark");
+    }
+
+    themeToggle.addEventListener("click", () => {
+        const next = document.body.classList.contains("light") ? "dark" : "light";
+        setTheme(next);
+    });
 
     function fmt(t) {
         return t.toFixed(2);
@@ -334,6 +408,7 @@
         btnCut.textContent = "Cut & Download";
     });
 
+    initTheme();
     wireDropzone();
 })();
 </script>
