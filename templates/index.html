@@ -2,340 +2,144 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>jasvccd</title>
     <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
     <link rel="alternate icon" type="image/x-icon" href="/static/favicon.ico">
-    <style>
-        body {
-            font-family: system-ui, sans-serif;
-            margin: 0;
-            padding: 1rem;
-            background: #111827;
-            color: #e5e7eb;
-        }
-        header {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 1rem;
-        }
-        .logo {
-            width: 80%;
-            max-width: 720px;
-            min-width: 340px;
-            height: auto;
-        }
-        #dropzone {
-            border: 2px dashed #6b7280;
-            border-radius: 8px;
-            padding: 2rem;
-            text-align: center;
-            margin-bottom: 1rem;
-            cursor: pointer;
-        }
-        #dropzone.dragover {
-            border-color: #10b981;
-            background: #020617;
-        }
-        video {
-            width: 100%;
-            max-height: 480px;
-            background: black;
-            margin-bottom: 0.75rem;
-        }
-        .controls {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-            margin-top: 0.5rem;
-        }
-        .row {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        input[type="range"] {
-            flex: 1;
-        }
-        button {
-            background: #1f2937;
-            color: #e5e7eb;
-            border: 1px solid #4b5563;
-            border-radius: 4px;
-            padding: 0.35rem 0.75rem;
-            cursor: pointer;
-        }
-        button.primary {
-            background: #10b981;
-            border-color: #059669;
-            color: #022c22;
-            font-weight: 600;
-        }
-        button:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-        }
-        small {
-            color: #9ca3af;
-        }
-        footer {
-            margin-top: 1.5rem;
-            color: #9ca3af;
-            font-size: 0.85rem;
-        }
-        footer a {
-            color: #9ca3af;
-        }
-        .attrib {
-            display: flex;
-            flex-direction: column;
-            gap: 0.4rem;
-            align-items: center;
-            text-align: center;
-            background: linear-gradient(135deg, #0b1326, #0b162f);
-            border: 1px solid #1f2937;
-            padding: 0.9rem 1.2rem;
-            border-radius: 10px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
-            width: min(960px, 96%);
-            margin: 0 auto;
-            color: #e5e7eb;
-        }
-        .attrib a {
-            color: #c7d2fe;
-        }
-        .attrib-icon {
-            width: 18px;
-            height: 18px;
-            vertical-align: middle;
-        }
-    </style>
+    <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
-<header>
-    <img class="logo" src="/static/jasvccd.svg" alt="JASVCCD">
-</header>
-<div id="dropzone">
-    <p>Drop a video here or click to choose.</p>
-    <input id="file-input" type="file" accept="video/*" style="display:none;">
-</div>
+<div class="wrap">
+    <header class="top">
+        <img class="logo" src="/static/jasvccd.svg" alt="JASVCCD">
+    </header>
+    <p class="tagline">Drop a video, trim it, ship it — with a few tricks for fixing sloppy files.</p>
 
-<video id="video" controls hidden></video>
-
-<div id="ui" class="controls" hidden>
-    <div class="row">
-        <label style="width:80px;">Start</label>
-        <input id="start-range" type="range" min="0" max="0" step="0.05">
-        <span id="start-label">0.0s</span>
-        <button id="set-start">From playhead</button>
-    </div>
-    <div class="row">
-        <label style="width:80px;">End</label>
-        <input id="end-range" type="range" min="0" max="0" step="0.05">
-        <span id="end-label">0.0s</span>
-        <button id="set-end">From playhead</button>
-    </div>
-    <div class="row">
-        <small>Video duration: <span id="duration-label">0.0</span>s</small>
-    </div>
-    <div class="row">
-        <button id="preview">Preview segment</button>
-        <button id="cut" class="primary">Cut &amp; Download</button>
-    </div>
-</div>
-
-<footer>
-    <div class="attrib">
-        <div>
-            Credits & source on <a href="https://github.com/mythosaz/jasvccd/" target="_blank" rel="noopener">GitHub</a>
-        </div>
-        <div>
-            <img class="attrib-icon" src="/static/Octicons-mark-github.svg" alt="GitHub icon"> Open source •
-            <img class="attrib-icon" src="/static/FFmpeg_Logo_new.svg" alt="FFmpeg logo"> Powered by FFmpeg •
-            <img class="attrib-icon" src="/static/Flask_logo.svg" alt="Flask logo"> Served with Flask
+    <div class="card">
+        <div id="dropzone">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 15V4" /><path d="M8 8l4-4 4 4" />
+                <path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" />
+            </svg>
+            <p id="dropzone-title">Drop a video here or click to choose</p>
+            <p class="hint" id="dropzone-hint">MP4, MOV, MKV, AVI, WebM — whatever you've got</p>
+            <input id="file-input" type="file" accept="video/*" style="display:none;">
         </div>
     </div>
-</footer>
+
+    <div id="workspace" class="hidden">
+        <div class="card">
+            <div id="compat-banner" class="banner warning hidden">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" />
+                    <line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" />
+                </svg>
+                <div>
+                    <div>Heads up</div>
+                    <ul id="compat-list"></ul>
+                </div>
+            </div>
+
+            <video id="video" controls></video>
+
+            <div class="trim-row">
+                <label>Start</label>
+                <input id="start-range" type="range" min="0" max="0" step="0.05">
+                <span class="value" id="start-label">0.0s</span>
+                <button class="btn btn-sm set-btn" id="set-start">Use playhead</button>
+            </div>
+            <div class="trim-row">
+                <label>End</label>
+                <input id="end-range" type="range" min="0" max="0" step="0.05">
+                <span class="value" id="end-label">0.0s</span>
+                <button class="btn btn-sm set-btn" id="set-end">Use playhead</button>
+            </div>
+            <p class="duration-note">
+                Duration: <span id="duration-label">0.0</span>s
+                &nbsp;·&nbsp;
+                <button class="btn btn-sm btn-ghost" id="preview">▶ Preview selection</button>
+            </p>
+
+            <div class="actions">
+                <button id="cut" class="btn btn-primary">Cut &amp; Download</button>
+            </div>
+            <div class="secondary-actions">
+                <button id="fix-container" class="btn">Fix Container</button>
+                <button id="normalize" class="btn">Normalize</button>
+            </div>
+            <p class="action-hint">
+                Fix Container repackages the file fast, no re-encode. Normalize re-encodes to a safe H.264/AAC MP4
+                when a fast fix won't cut it.
+            </p>
+
+            <div id="result" class="result hidden">
+                <div class="meta">
+                    <div class="label">Ready</div>
+                    <div class="file" id="result-file">—</div>
+                </div>
+                <div class="buttons">
+                    <button id="result-download" class="btn btn-sm">Download</button>
+                    <button id="result-save" class="btn btn-sm btn-primary hidden">Save to Share</button>
+                </div>
+            </div>
+            <p class="status-note" id="status-note"></p>
+        </div>
+
+        <details class="advanced">
+            <summary>
+                Advanced <span class="sub">info, metadata &amp; cleanup</span>
+                <span class="chev">›</span>
+            </summary>
+            <div class="advanced-body">
+                <div class="advanced-section">
+                    <h3>File info</h3>
+                    <dl class="info-grid" id="info-grid"></dl>
+                </div>
+                <div class="advanced-section">
+                    <h3>Metadata</h3>
+                    <div class="meta-form">
+                        <div class="meta-field">
+                            <label for="meta-title">Title</label>
+                            <input type="text" id="meta-title" placeholder="—">
+                        </div>
+                        <div class="meta-field">
+                            <label for="meta-artist">Artist</label>
+                            <input type="text" id="meta-artist" placeholder="—">
+                        </div>
+                        <div class="meta-field">
+                            <label for="meta-comment">Comment</label>
+                            <input type="text" id="meta-comment" placeholder="—">
+                        </div>
+                        <div class="meta-buttons">
+                            <button id="meta-apply" class="btn btn-sm btn-primary">Apply tags</button>
+                            <button id="meta-wipe" class="btn btn-sm btn-danger">Wipe all metadata</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </details>
+    </div>
+
+    <footer>
+        <div class="attrib">
+            <div>
+                Credits & source on <a href="https://github.com/mythosaz/jasvccd/" target="_blank" rel="noopener">GitHub</a>
+            </div>
+            <div>
+                <img class="attrib-icon" src="/static/Octicons-mark-github.svg" alt="GitHub icon"> Open source •
+                <img class="attrib-icon" src="/static/FFmpeg_Logo_new.svg" alt="FFmpeg logo"> Powered by FFmpeg •
+                <img class="attrib-icon" src="/static/Flask_logo.svg" alt="Flask logo"> Served with Flask
+            </div>
+        </div>
+    </footer>
+</div>
 
 <script>
-(() => {
-    const dropzone = document.getElementById("dropzone");
-    const fileInput = document.getElementById("file-input");
-    const video = document.getElementById("video");
-    const ui = document.getElementById("ui");
-
-    const startRange = document.getElementById("start-range");
-    const endRange = document.getElementById("end-range");
-    const startLabel = document.getElementById("start-label");
-    const endLabel = document.getElementById("end-label");
-    const durationLabel = document.getElementById("duration-label");
-
-    const btnSetStart = document.getElementById("set-start");
-    const btnSetEnd = document.getElementById("set-end");
-    const btnPreview = document.getElementById("preview");
-    const btnCut = document.getElementById("cut");
-
-    let videoMeta = null; // { id, ext, duration, url }
-    let previewing = false;
-
-    function fmt(t) {
-        return t.toFixed(2);
-    }
-
-    function wireDropzone() {
-        dropzone.addEventListener("click", () => fileInput.click());
-        fileInput.addEventListener("change", e => {
-            if (e.target.files && e.target.files[0]) {
-                uploadFile(e.target.files[0]);
-            }
-        });
-
-        ["dragenter", "dragover"].forEach(ev => {
-            dropzone.addEventListener(ev, e => {
-                e.preventDefault();
-                e.stopPropagation();
-                dropzone.classList.add("dragover");
-            });
-        });
-        ["dragleave", "drop"].forEach(ev => {
-            dropzone.addEventListener(ev, e => {
-                e.preventDefault();
-                e.stopPropagation();
-                dropzone.classList.remove("dragover");
-            });
-        });
-        dropzone.addEventListener("drop", e => {
-            const file = e.dataTransfer.files[0];
-            if (file) uploadFile(file);
-        });
-    }
-
-    async function uploadFile(file) {
-        btnCut.disabled = true;
-        btnPreview.disabled = true;
-        dropzone.innerHTML = "<p>Uploading…</p>";
-
-        const form = new FormData();
-        form.append("file", file);
-        const resp = await fetch("/upload", {
-            method: "POST",
-            body: form
-        });
-        if (!resp.ok) {
-            dropzone.innerHTML = "<p>Upload failed.</p>";
-            return;
-        }
-        videoMeta = await resp.json();
-
-        // Load video
-        video.src = videoMeta.url;
-        video.hidden = false;
-        ui.hidden = false;
-
-        const duration = videoMeta.duration;
-        startRange.min = 0;
-        startRange.max = duration;
-        endRange.min = 0;
-        endRange.max = duration;
-        startRange.value = 0;
-        endRange.value = duration;
-        startLabel.textContent = "0.00s";
-        endLabel.textContent = fmt(duration) + "s";
-        durationLabel.textContent = fmt(duration);
-
-        dropzone.innerHTML = "<p>Drop another video to replace.</p>";
-        btnCut.disabled = false;
-        btnPreview.disabled = false;
-    }
-
-    function syncLabels() {
-        const start = parseFloat(startRange.value);
-        const end = parseFloat(endRange.value);
-        if (end < start) {
-            endRange.value = start;
-        }
-        startLabel.textContent = fmt(parseFloat(startRange.value)) + "s";
-        endLabel.textContent = fmt(parseFloat(endRange.value)) + "s";
-    }
-
-    startRange.addEventListener("input", syncLabels);
-    endRange.addEventListener("input", syncLabels);
-
-    btnSetStart.addEventListener("click", () => {
-        if (videoMeta) {
-            startRange.value = Math.min(video.currentTime, parseFloat(endRange.value));
-            syncLabels();
-        }
-    });
-
-    btnSetEnd.addEventListener("click", () => {
-        if (videoMeta) {
-            endRange.value = Math.max(video.currentTime, parseFloat(startRange.value));
-            syncLabels();
-        }
-    });
-
-    btnPreview.addEventListener("click", () => {
-        if (!videoMeta) return;
-        const start = parseFloat(startRange.value);
-        const end = parseFloat(endRange.value);
-        if (end <= start) return;
-
-        previewing = true;
-        video.currentTime = start;
-        video.play();
-    });
-
-    video.addEventListener("timeupdate", () => {
-        if (!previewing) return;
-        const end = parseFloat(endRange.value);
-        if (video.currentTime >= end) {
-            video.pause();
-            previewing = false;
-        }
-    });
-
-    btnCut.addEventListener("click", async () => {
-        if (!videoMeta) return;
-        btnCut.disabled = true;
-        btnCut.textContent = "Cutting…";
-
-        const start = parseFloat(startRange.value);
-        const end = parseFloat(endRange.value);
-
-        const resp = await fetch("/cut", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                id: videoMeta.id,
-                ext: videoMeta.ext,
-                start: start,
-                end: end
-            })
-        });
-
-        if (!resp.ok) {
-            alert("Cut failed.");
-            btnCut.disabled = false;
-            btnCut.textContent = "Cut & Download";
-            return;
-        }
-
-        const blob = await resp.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "clip.mp4";
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        window.URL.revokeObjectURL(url);
-
-        btnCut.disabled = false;
-        btnCut.textContent = "Cut & Download";
-    });
-
-    wireDropzone();
-})();
+    window.APP_CONFIG = {
+        shareEnabled: {{ share_enabled | tojson }},
+        shareLabel: {{ share_label | tojson }}
+    };
 </script>
+<script src="/static/js/app.js"></script>
 </body>
 </html>
