@@ -6,6 +6,12 @@ services:
     volumes:
       - jas_data:/app/uploads
       - jas_out:/app/outputs
+      # Optional: mount a NAS/network share and point SHARE_DIR at it to
+      # enable the "Save to Share" button. Comment out if you don't want it.
+      - /path/to/your/nas/folder:/app/share
+    environment:
+      - SHARE_DIR=/app/share
+      - SHARE_LABEL=NAS
     restart: unless-stopped
 
 volumes:
